@@ -1,0 +1,130 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" compressed="false" version="29.3.0">
+  <diagram id="1204-register-assignments" name="1204 Register Assignments">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="1204.TIMER_EVENT_LAB&#xa;Register Bit Assignments for GPIO / LED / UART / KEY / TIM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111827;fontColor=#FFFFFF;strokeColor=#0F172A;fontStyle=1;fontSize=22;" vertex="1" parent="1">
+          <mxGeometry x="480" y="20" width="960" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="note0" value="Source path: main.c, led.c, key.c, uart.c, timer.c, exception.c, option.h&#xa;All labels are ASCII-only to avoid mojibake in draw.io." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#94A3B8;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="480" y="105" width="960" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sys" value="System Context&#xa;SYSCLK = 96 MHz&#xa;HCLK = 96 MHz&#xa;PCLK1 = 48 MHz&#xa;PCLK2 = 96 MHz&#xa;TIMXCLK = 96 MHz&#xa;Main flow: Sys_Init() -&gt; Uart2_Init(115200) -&gt; LED_Init() -&gt; Key_ISR_Enable(1) -&gt; Uart2_RX_Interrupt_Enable(1) -&gt; TIM4_Repeat_Interrupt_Enable(1, 100)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;fontStyle=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="380" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="gpio" value="GPIO Pin Map&#xa;PA5  : LED output&#xa;PA2  : USART2_TX (AF7)&#xa;PA3  : USART2_RX (AF7)&#xa;PC13 : KEY input / EXTI13&#xa;Common GPIO register families used: RCC-&gt;AHB1ENR, GPIOx-&gt;MODER, OTYPER, PUPDR, AFR, ODR, IDR, LCKR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFCCB;strokeColor=#65A30D;fontStyle=1;fontSize=15;" vertex="1" parent="1">
+          <mxGeometry x="1500" y="20" width="360" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sec_led" value="LED Module [led.c]" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=0;rounded=1;startSize=34;fillColor=#DCFCE7;strokeColor=#16A34A;" vertex="1" parent="1">
+          <mxGeometry x="40" y="210" width="410" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="led_1" value="RCC-&gt;AHB1ENR&#xa;bit0 GPIOAEN = 1&#xa;Role: enable GPIOA clock" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_led">
+          <mxGeometry y="44" width="410" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="led_2" value="GPIOA-&gt;MODER&#xa;bits[11:10] for PA5 = 01b&#xa;Write: Macro_Write_Block(mask=0x3, data=0x1, shift=10)&#xa;Role: PA5 becomes general-purpose output" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_led">
+          <mxGeometry y="112" width="410" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="led_3" value="GPIOA-&gt;OTYPER&#xa;bit5 = 0&#xa;Role: push-pull output" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_led">
+          <mxGeometry y="208" width="410" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="led_4" value="GPIOA-&gt;ODR&#xa;bit5 = 0 at init&#xa;bit5 = 1 in LED_On()&#xa;bit5 = 0 in LED_Off()&#xa;Role: drive LED state" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_led">
+          <mxGeometry y="264" width="410" height="78" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sec_uart" value="UART2 Module [uart.c]" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=0;rounded=1;startSize=34;fillColor=#FCE7F3;strokeColor=#DB2777;" vertex="1" parent="1">
+          <mxGeometry x="490" y="210" width="470" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="uart_1" value="RCC clocks&#xa;RCC-&gt;AHB1ENR bit0 GPIOAEN = 1&#xa;RCC-&gt;APB1ENR bit17 USART2EN = 1&#xa;Role: enable GPIOA and USART2 clocks" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_uart">
+          <mxGeometry y="44" width="470" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="uart_2" value="GPIOA-&gt;MODER for PA2, PA3&#xa;bits[7:4] = 1010b (0xA)&#xa;Write: Macro_Write_Block(mask=0xF, data=0xA, shift=4)&#xa;Role: PA2/PA3 become alternate-function pins" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_uart">
+          <mxGeometry y="124" width="470" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="uart_3" value="GPIOA-&gt;AFR[0] for PA2, PA3&#xa;bits[15:8] = 0x77&#xa;PA2 AF = 7, PA3 AF = 7&#xa;Role: connect pins to USART2_TX / USART2_RX" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_uart">
+          <mxGeometry y="214" width="470" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="uart_4" value="GPIOA-&gt;PUPDR for PA2, PA3&#xa;bits[7:4] = 0101b (0x5)&#xa;Role: pull-up on PA2 and PA3" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_uart">
+          <mxGeometry y="300" width="470" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="uart_5" value="GPIOA-&gt;LCKR lock sequence&#xa;bit16 LCKK toggled 1 -&gt; 0 -&gt; 1&#xa;bit2 LCK2 = 1, bit3 LCK3 = 1&#xa;Role: lock PA2 / PA3 configuration" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_uart">
+          <mxGeometry y="370" width="470" height="86" as="geometry" />
+        </mxCell>
+        <mxCell id="uart_6" value="USART2-&gt;BRR&#xa;PCLK1 = 48 MHz, baud = 115200&#xa;mant = 26, frac = 1&#xa;BRR = (26 &lt;&lt; 4) | 1 = 0x1A1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_uart">
+          <mxGeometry y="454" width="470" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="uart_7" value="USART2 control registers&#xa;CR1 = (1&lt;&lt;13) | (1&lt;&lt;3) | (1&lt;&lt;2) = 0x200C&#xa;bit13 UE = 1, bit3 TE = 1, bit2 RE = 1&#xa;bit12 M = 0, bit10 PCE = 0&#xa;CR2 bits[13:12] STOP = 00b&#xa;CR3 = 0x0000" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_uart">
+          <mxGeometry y="538" width="470" height="108" as="geometry" />
+        </mxCell>
+        <mxCell id="uart_8" value="RX interrupt path&#xa;CR1 bit5 RXNEIE = 1 in Uart2_RX_Interrupt_Enable(1)&#xa;NVIC_ClearPendingIRQ(38), NVIC_EnableIRQ(38)&#xa;USART2_IRQHandler(): read USART2-&gt;DR, set Uart_Data_In = 1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_uart">
+          <mxGeometry y="642" width="470" height="96" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sec_key" value="KEY + EXTI Module [key.c / exception.c]" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=0;rounded=1;startSize=34;fillColor=#FEF3C7;strokeColor=#D97706;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="210" width="420" height="470" as="geometry" />
+        </mxCell>
+        <mxCell id="key_1" value="RCC-&gt;AHB1ENR&#xa;bit2 GPIOCEN = 1&#xa;Role: enable GPIOC clock" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_key">
+          <mxGeometry y="44" width="420" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="key_2" value="GPIOC-&gt;MODER for PC13&#xa;bits[27:26] = 00b&#xa;Write: Macro_Write_Block(mask=0x3, data=0x0, shift=26)&#xa;Role: PC13 becomes input" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_key">
+          <mxGeometry y="112" width="420" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="key_3" value="RCC-&gt;APB2ENR&#xa;bit14 SYSCFGEN = 1&#xa;Role: enable SYSCFG for EXTI routing" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_key">
+          <mxGeometry y="198" width="420" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="key_4" value="SYSCFG-&gt;EXTICR[3] for EXTI13&#xa;bits[7:4] = 0010b (0x2)&#xa;Role: route EXTI13 to port C, pin 13" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_key">
+          <mxGeometry y="266" width="420" height="86" as="geometry" />
+        </mxCell>
+        <mxCell id="key_5" value="EXTI registers&#xa;FTSR bit13 = 1 : falling-edge trigger enable&#xa;PR bit13 = 1 : clear pending before enable&#xa;IMR bit13 = 1 : unmask interrupt line" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_key">
+          <mxGeometry y="348" width="420" height="102" as="geometry" />
+        </mxCell>
+        <mxCell id="key_6" value="NVIC and ISR&#xa;NVIC_ClearPendingIRQ(40), NVIC_EnableIRQ(40)&#xa;EXTI15_10_IRQHandler(): Key_Pressed = 1&#xa;Then EXTI-&gt;PR bit13 = 1 and NVIC pending clear" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_key">
+          <mxGeometry y="446" width="420" height="94" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sec_tim" value="TIM4 Repeat Interrupt Module [timer.c / exception.c]" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=0;rounded=1;startSize=34;fillColor=#EDE9FE;strokeColor=#7C3AED;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="210" width="400" height="540" as="geometry" />
+        </mxCell>
+        <mxCell id="tim_1" value="RCC-&gt;APB1ENR&#xa;bit2 TIM4EN = 1&#xa;Role: enable TIM4 clock" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_tim">
+          <mxGeometry y="44" width="400" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="tim_2" value="TIM4 timing basis&#xa;TIM4_TICK = 20 us, TIM4_FREQ = 50000 Hz&#xa;TIMXCLK = 96 MHz&#xa;PSC = (96000000 / 50000) - 1 = 1919 = 0x77F" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_tim">
+          <mxGeometry y="112" width="400" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="tim_3" value="TIM4-&gt;CR1 base value&#xa;(1&lt;&lt;4) | (0&lt;&lt;3) = 0x0010&#xa;bit4 DIR = 1 : down-count&#xa;bit3 OPM = 0 : repeat mode" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_tim">
+          <mxGeometry y="202" width="400" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="tim_4" value="TIM4-&gt;ARR&#xa;TIME4_PLS_OF_1ms = 50&#xa;Call from main: TIM4_Repeat_Interrupt_Enable(1, 100)&#xa;ARR = 50 * 100 = 5000" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_tim">
+          <mxGeometry y="292" width="400" height="92" as="geometry" />
+        </mxCell>
+        <mxCell id="tim_5" value="Start sequence&#xa;EGR bit0 UG = 1 : load PSC/ARR immediately&#xa;SR bit0 UIF = 0 : clear pending&#xa;CR1 bit0 CEN = 1 : start counter" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_tim">
+          <mxGeometry y="380" width="400" height="94" as="geometry" />
+        </mxCell>
+        <mxCell id="tim_6" value="Interrupt enable&#xa;DIER bit0 UIE = 1&#xa;NVIC_ClearPendingIRQ(30), NVIC_EnableIRQ(30)&#xa;Role: generate TIM4 update interrupt" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_tim">
+          <mxGeometry y="470" width="400" height="88" as="geometry" />
+        </mxCell>
+        <mxCell id="tim_7" value="TIM4_IRQHandler()&#xa;SR bit0 UIF cleared&#xa;NVIC pending cleared&#xa;TIM4_Expired = 1&#xa;Main loop uses this flag to toggle LED and count seconds" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_tim">
+          <mxGeometry y="554" width="400" height="96" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sec_gpio_common" value="GPIO Summary by Register Write" style="swimlane;fontStyle=1;childLayout=stackLayout;horizontal=0;rounded=1;startSize=34;fillColor=#E0F2FE;strokeColor=#0284C7;" vertex="1" parent="1">
+          <mxGeometry x="40" y="580" width="410" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="gpio_1" value="GPIOA clock&#xa;RCC-&gt;AHB1ENR bit0 = 1&#xa;Used by LED and UART2" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_gpio_common">
+          <mxGeometry y="44" width="410" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="gpio_2" value="GPIOC clock&#xa;RCC-&gt;AHB1ENR bit2 = 1&#xa;Used by KEY input" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_gpio_common">
+          <mxGeometry y="108" width="410" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="gpio_3" value="Mode values actually written&#xa;PA5  : MODER[11:10] = 01b output&#xa;PA2/3: MODER[7:4]   = 1010b alternate-function&#xa;PC13 : MODER[27:26] = 00b input" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=12;fontSize=16;" vertex="1" parent="sec_gpio_common">
+          <mxGeometry y="172" width="410" height="92" as="geometry" />
+        </mxCell>
+
+        <mxCell id="footer" value="Recommended reading order: GPIO summary -&gt; per-module register writes -&gt; ISR/runtime effects" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#CBD5E1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="580" y="880" width="760" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
